@@ -1,4 +1,4 @@
-/* 整体页面容器 */
+/* Overall page container */
 .page-container {
   min-height: 100vh;
   background-color: #f3f4f6;
@@ -8,7 +8,7 @@
   box-sizing: border-box;
 }
 
-/* 头部样式 */
+/* Header styles */
 .header {
   background-color: white;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -38,7 +38,7 @@
   }
 }
 
-/* 顶部按钮样式 */
+/* Top button styles */
 .top-buttons {
   display: flex;
   gap: 1rem;
@@ -67,7 +67,7 @@
   color: #1e40af;
 }
 
-/* 导出按钮样式 */
+/* Export button styles */
 .export-button-container {
   display: flex;
   gap: 1rem;
@@ -93,7 +93,7 @@
   cursor: not-allowed;
 }
 
-/* 主体内容样式 */
+/* Main content styles */
 .main-content {
   flex: 1;
   width: 100%;
@@ -136,7 +136,7 @@
   box-sizing: border-box;
 }
 
-/* 文件拖拽区域样式 */
+/* File drag and drop area styles */
 .file-drop-zone {
   border: 2px dashed #d1d5db;
   border-radius: 0.5rem;
@@ -203,7 +203,7 @@
   background-color: #1d4ed8;
 }
 
-/* 功能按钮样式 */
+/* Function button styles */
 .function-buttons {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -259,7 +259,7 @@
   color: #9ca3af;
 }
 
-/* 图片容器样式 */
+/* Image container styles */
 .image-container {
   margin-top: 1rem;
   display: flex;
@@ -269,7 +269,7 @@
   padding: 1rem;
 }
 
-/* 加载样式 */
+/* Loading styles */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -297,7 +297,7 @@
   margin-top: 1rem;
 }
 
-/* 生成的图片样式 */
+/* Generated image styles */
 .generated-image {
   object-fit: cover;
 }
@@ -321,7 +321,7 @@
   display: block;
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 1200px) {
   .function-buttons {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

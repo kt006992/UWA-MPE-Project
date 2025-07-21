@@ -5,7 +5,7 @@
 
 
 ### `npm start`
-
+(make sure you are under mpe-app direction firstly)
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
@@ -39,3 +39,29 @@ The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+
+
+
+
+# How to use the web app
+
+### 'Step 1'
+
+Pick a detect mood from top left corner
+
+### 'Step 2'
+
+Use the input file area to pick an input file. (you can see the little "+" area and there is example file for an input example.)
+
+### 'Step 3'
+
+Click the "upload file' button, it will send to the backend server if the inpiut file is correct.
+
+### 'Step 4'
+
+Then you can use those functioanl buttons for generating images.
+
+### 'Step 5'
+
+For each image, you can click the export button on top right to save the image as PDF file.

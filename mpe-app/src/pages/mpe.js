@@ -4,36 +4,39 @@ import React, { useState, useEffect, useRef } from "react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf'; 
-import './mpe.css'; // 导入分离的CSS样式
+import './mpe.css'; // Import separated CSS styles
 
 const Page = () => {
-  // 定义 Hooks 和状态变量
+  // Define Hooks and state variables
   const [selectedTopButton, setSelectedTopButton] = useState("6-degree");
   const [selectedButton, setSelectedButton] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isFileUploaded, setIsFileUploaded] = useState(false); // New: Track whether file has been uploaded successfully
   const [isDragging, setIsDragging] = useState(false);
   const [generatedImages, setGeneratedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false); // New: Track upload status
   const imageContainerRef = useRef(null);
   const buttonContainerRef = useRef(null);
 
-  // 定义上传文件的函数
+  // Define file upload function
   const handleFileChange = (files) => {
     if (files.length > 0) {
       const file = files[0];
       setSelectedFile(file);
       console.log("Selected file:", file.name);
 
-      // 清空生成的图片数组
+      // Reset upload status
+      setIsFileUploaded(false);
+      // Clear generated images array
       setGeneratedImages([]);
-
-      // 重置其他相关状态
+      // Reset other related states
       setIsLoading(false);
       setIsExporting(false);
     }
 
-    // 清空输入元素以确保重新选择相同文件时触发onChange
+    // Clear input element to ensure onChange triggers when selecting the same file again
     const fileInput = document.getElementById('file-upload');
     fileInput.value = '';
   };
@@ -55,16 +58,18 @@ const Page = () => {
     handleFileChange(files);
   };
 
-  // 发送文件到后端上传
+  // Send file to backend for upload
   const uploadFile = async () => {
     if (!selectedFile) {
-      alert("Please select a file first.");
+      toast.error("Please select a file first.");
       return;
     }
 
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('degree', selectedTopButton);
+
+    setIsUploading(true); // Start uploading
 
     try {
       const response = await fetch('http://127.0.0.1:5000/upload', {
@@ -74,18 +79,23 @@ const Page = () => {
 
       if (!response.ok) throw new Error('Failed to upload file');
       
+      // Enable function buttons after successful upload
+      setIsFileUploaded(true);
       toast.success("File uploaded successfully!");
       console.log("File uploaded successfully");
     } catch (error) {
       toast.error("Error uploading file");
       console.error("Error uploading file:", error);
+      setIsFileUploaded(false); // Ensure buttons remain disabled on upload failure
+    } finally {
+      setIsUploading(false); // End uploading
     }
   };
 
-  // 定义生成图片的函数
+  // Define image generation function
   const generateImage = async (endpoint) => {
     setIsLoading(true);
-    setGeneratedImages([]); // 清空之前生成的图片
+    setGeneratedImages([]); // Clear previously generated images
 
     try {
       const response = await fetch(`http://127.0.0.1:5000/${endpoint}`, {
@@ -107,18 +117,19 @@ const Page = () => {
     }
   }, [generatedImages]);
 
-  // 定义按钮触发事件
+  // Define button click events
   const handleTopButtonClick = (label) => {
     setSelectedTopButton(label);
     setSelectedButton(null);
     setSelectedFile(null);
+    setIsFileUploaded(false); // Reset upload status
     setGeneratedImages([]);
   };
 
   const handleFunctionalButtonClick = (label, endpoint) => {
-    // 检查是否已上传文件
-    if (!selectedFile) {
-      toast.error('Please select and upload a file first.');
+    // Check if file has been uploaded
+    if (!isFileUploaded) {
+      toast.error('Please upload a file first.');
       return;
     }
     
@@ -126,7 +137,7 @@ const Page = () => {
     generateImage(endpoint);
   };
 
-  // 定义导出图片为PDF文件的函数
+  // Define function to export images as PDF
   const exportImagesToPDF = () => {
     if (!selectedButton || generatedImages.length === 0) {
       toast.error('No images available for export.');
@@ -144,7 +155,7 @@ const Page = () => {
       progress: undefined,
     });
 
-    const doc = new jsPDF(); // 创建PDF文档
+    const doc = new jsPDF(); // Create PDF document
   
     generatedImages.forEach((image, index) => {
       const img = new Image();
@@ -152,17 +163,17 @@ const Page = () => {
       img.onload = () => {
         const imgWidth = img.width;
         const imgHeight = img.height;
-        const pageWidth = doc.internal.pageSize.getWidth(); // 获取PDF页面宽度
-        const pageHeight = doc.internal.pageSize.getHeight(); // 获取PDF页面高度
-        const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight); // 计算适合页面的比例
+        const pageWidth = doc.internal.pageSize.getWidth(); // Get PDF page width
+        const pageHeight = doc.internal.pageSize.getHeight(); // Get PDF page height
+        const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight); // Calculate ratio to fit page
   
         const newWidth = imgWidth * ratio;
         const newHeight = imgHeight * ratio;
   
-        if (index > 0) doc.addPage(); // 添加新页面
-        doc.addImage(image, 'JPEG', (pageWidth - newWidth) / 2, (pageHeight - newHeight) / 2, newWidth, newHeight); // 添加图片保持比例
+        if (index > 0) doc.addPage(); // Add new page
+        doc.addImage(image, 'JPEG', (pageWidth - newWidth) / 2, (pageHeight - newHeight) / 2, newWidth, newHeight); // Add image maintaining aspect ratio
         if (index === generatedImages.length - 1) {
-          const fileName = `${selectedButton.replace(/[^a-zA-Z0-9 ]/g, '')}.pdf`; // 替换特殊字符
+          const fileName = `${selectedButton.replace(/[^a-zA-Z0-9 ]/g, '')}.pdf`; // Replace special characters
           doc.save(fileName);
           setIsExporting(false);
           toast.dismiss(); 
@@ -172,7 +183,7 @@ const Page = () => {
     });
   };
 
-  // 定义按钮的内容
+  // Define button content
   const topButtonLabels = [
     { label: "6-degree" },
     { label: "12-degree" },
@@ -188,13 +199,13 @@ const Page = () => {
     { label: "Longitudinal change of loci counts against baseline", endpoint: "generate_change_monitor_bar" }
   ];
 
-  // 网页的主要结构设计
+  // Main structure design of the webpage
   return (
     <div className="page-container">
-      {/* 头部 */}
+      {/* Header */}
       <header className="header">
         <div className="header-content">
-          {/* 左侧按钮 */}
+          {/* Left side buttons */}
           <div className="top-buttons">
             {topButtonLabels.slice(0, -1).map(({ label }) => (
               <button
@@ -207,7 +218,7 @@ const Page = () => {
             ))}
           </div>
 
-          {/* 右侧导出按钮 */}
+          {/* Right side export button */}
           <div className="export-button-container">
             <button
               className="export-button"
@@ -220,7 +231,7 @@ const Page = () => {
         </div>
       </header>
       
-      {/* 主体内容 */}
+      {/* Main content */}
       <main className="main-content">
         <div className="content-container">
           <div className="content-panel">
@@ -248,6 +259,7 @@ const Page = () => {
               {selectedFile && (
                 <div className="selected-file">
                   Selected file: {selectedFile.name}
+                  {isFileUploaded && <span className="upload-status"> ✓ Uploaded</span>}
                 </div>
               )}
 
@@ -255,8 +267,9 @@ const Page = () => {
                 <button
                   className="upload-button"
                   onClick={uploadFile}
+                  disabled={!selectedFile || isUploading}
                 >
-                  Upload File
+                  {isUploading ? 'Uploading...' : 'Upload File'}
                 </button>
               </div>
             </div>
@@ -265,16 +278,16 @@ const Page = () => {
               {bottomButtonLabels.map(({ label, endpoint }) => (
                 <button
                   key={label}
-                  className={`function-button ${selectedButton === label ? 'selected' : ''} ${!selectedFile ? 'disabled' : ''}`}
+                  className={`function-button ${selectedButton === label ? 'selected' : ''} ${!isFileUploaded ? 'disabled' : ''}`}
                   onClick={() => handleFunctionalButtonClick(label, endpoint)}
-                  disabled={!selectedTopButton || !selectedFile}
+                  disabled={!selectedTopButton || !isFileUploaded}
                 >
                   {label}
                 </button>
               ))}
             </div>
 
-            {/* 图片生成区域 */}
+            {/* Image generation area */}
             <div ref={imageContainerRef} className="image-container">
               {isLoading && (
                 <div className="loading-container">
