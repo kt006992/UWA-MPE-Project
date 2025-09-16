@@ -40,13 +40,6 @@ const Page = () => {
   const onDragLeave = e => { e.preventDefault(); setIsDragging(false); };
   const onDrop = e => { e.preventDefault(); setIsDragging(false); handleFileChange(e.dataTransfer.files); };
 
-  const handleTopButtonClick = (label) => {
-    setSelectedTopButton(label);
-    setSelectedButton(null);
-    reset();
-    setItems([]);
-  };
-
   // Pull data & generate graph
   const fetchAndRender = async (key) => {
     if (!isFileUploaded) { toast.error('Please upload a file first.'); return; }
